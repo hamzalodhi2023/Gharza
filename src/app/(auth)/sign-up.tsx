@@ -1,5 +1,6 @@
 import { useSignUp } from "@clerk/expo";
-import { memo, useState } from "react";
+import { Link, useRouter } from "expo-router";
+import { useState } from "react";
 import {
   Image,
   KeyboardAvoidingView,
@@ -11,30 +12,18 @@ import {
   View,
 } from "react-native";
 
-const SignUpForm = memo(function SignUpForm() {
+export default function SignUp() {
   const { signUp, errors, fetchStatus } = useSignUp();
+
+  const router = useRouter();
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
 
   const isLoading = fetchStatus === "fetching";
-
-  const handleSubmit = async () => {
-    if (!email || !password || !firstName || !lastName || !signUp) return;
-
-    try {
-      await signUp.create({
-        emailAddress: email,
-        password: password,
-        firstName: firstName,
-        lastName: lastName,
-      });
-    } catch (err) {
-      console.error("[SIGN-UP] Create error:", err);
-    }
-  };
 
   return (
     <KeyboardAvoidingView
@@ -46,7 +35,7 @@ const SignUpForm = memo(function SignUpForm() {
         className="bg-white"
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 justify-center px-6 py-12">
+        <View className="flex-1 items-center justify-center px-6 py-12">
           <Image
             source={require("../../../assets/images/logo.png")}
             className="w-32 h-16 mb-3"
@@ -96,9 +85,13 @@ const SignUpForm = memo(function SignUpForm() {
             value={password}
             onChangeText={setPassword}
           />
+          {errors.fields.password && (
+            <Text className="text-red-500 mb-4">
+              {errors.fields.password.message}
+            </Text>
+          )}
 
           <TouchableOpacity
-            onPress={handleSubmit}
             className="w-full bg-blue-500 rounded-xl px-4 py-3 mb-6 items-center"
             disabled={isLoading}
           >
@@ -106,12 +99,15 @@ const SignUpForm = memo(function SignUpForm() {
               {isLoading ? "Creating..." : "Create Account"}
             </Text>
           </TouchableOpacity>
+
+          <View className="flex-row justify-center">
+            <Text className="text-gray-500">Already have an account?</Text>
+            <Link href="/sign-in">
+              <Text className="text-blue-600 font-semibold">Sign In</Text>
+            </Link>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
-});
-
-export default function SignUpScreen() {
-  return <SignUpForm />;
 }
